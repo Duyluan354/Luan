@@ -1,4 +1,6 @@
 ﻿using Luan.Data;
+using Luan.DTOs.Product;
+using Luan.Mapper;
 using Luan.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,70 +44,57 @@ namespace Luan.Controllers
 
         // POST: api/product
         [HttpPost]
-        public async Task<ActionResult<Product>> Create(Product product)
+        public async Task<ActionResult<Product>> Create([FromBody] ProductCreateDTO productDto)
         {
-            // Kiểm tra dữ liệu đầu vào
-            if (string.IsNullOrEmpty(product.Name))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Tên sản phẩm là bắt buộc.");
+                return BadRequest(ModelState);
             }
 
-            if (product.Price <= 0)
-            {
-                return BadRequest("Giá sản phẩm phải lớn hơn 0.");
-            }
+            // Dùng mapper để chuyển DTO thành entity
+            var product = ProductMapper.ToProduct(productDto);
 
-            // Kiểm tra CategoryId có tồn tại trong cơ sở dữ liệu không
-            var category = await _context.Categories.FindAsync(product.CategoryId);
-            if (category == null)
-            {
-                return BadRequest("Danh mục không hợp lệ.");
-            }
-
-            // Gán thời gian tạo
-            product.CreatedAt = DateTime.UtcNow;
-
-            // Thêm sản phẩm vào cơ sở dữ liệu
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            // Trả về sản phẩm vừa tạo kèm theo mã trạng thái Created (201)
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            return Ok(product);
         }
-
 
         // PUT: api/product/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Product>> Update(int id, Product updatedProduct)
+        public async Task<ActionResult<Product>> Update(int id, [FromBody] ProductUpdateDTO dto)
         {
+            if (id != dto.Id)
+            {
+                return BadRequest("ID trong URL không khớp với ID trong dữ liệu.");
+            }
+
             var product = await _context.Products.FindAsync(id);
-            if (product == null)
-                return NotFound();
+            if (product == null || product.DeletedAt != null)
+            {
+                return NotFound("Không tìm thấy sản phẩm hoặc sản phẩm đã bị xóa.");
+            }
 
-            product.Name = updatedProduct.Name;
-            product.Price = updatedProduct.Price;
-            product.CategoryId = updatedProduct.CategoryId;
-            product.UserUpdate = updatedProduct.UserUpdate;
-            product.UpdatedAt = DateTime.UtcNow;
+            ProductMapper.UpdateProduct(product, dto);
 
+            _context.Products.Update(product);
             await _context.SaveChangesAsync();
+
             return Ok(product);
         }
 
         // DELETE: api/product/5?userDelete=admin
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, [FromQuery] string userDelete)
+        public async Task<IActionResult> Delete(int id)
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null)
                 return NotFound();
 
-            // Xoá mềm
-            product.DeletedAt = DateTime.UtcNow;
-            product.UserDelete = userDelete;
-
+            _context.Products.Remove(product);
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Đã xoá mềm sản phẩm." });
+
+            return Ok(new { message = "Đã xoá vĩnh viễn sản phẩm." });
         }
     }
 }

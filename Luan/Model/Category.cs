@@ -9,8 +9,10 @@ namespace Luan.Model
 
         [Required]
         public string Name { get; set; }
+
+        //public string UserCreate { get; set; }
+
         [JsonIgnore]
-        // Một Category có nhiều Product
         public List<Product> Products { get; set; }
     }
 }
