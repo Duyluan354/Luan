@@ -11,35 +11,39 @@ namespace Luan.Mapper
             return new Product
             {
                 Name = dto.Name,
+                Description = dto.Description,
                 Price = dto.Price,
-                UserCreate = "luan",
-                UserDelete = "luan",
-                UserUpdate = "luan",
+                StockQuantity = dto.StockQuantity,
+                ImageUrl = dto.ImageUrl,
+                Brand = dto.Brand,
+                IsAvailable = dto.IsAvailable,
+                Rating = dto.Rating,
+                UserCreate = dto.UserCreate ?? "duyluan",
+                UserUpdate = "duyluan",
+                UserDelete = "duyluan",
                 CreatedAt = DateTime.Now,
                 CategoryId = dto.CategoryId
             };
         }
+
+        // Cập nhật thông tin sản phẩm từ DTO
         public static void UpdateProduct(Product product, ProductUpdateDTO dto)
         {
             product.Name = dto.Name;
+            product.Description = dto.Description;
             product.Price = dto.Price;
+            product.StockQuantity = dto.StockQuantity;
+            product.ImageUrl = dto.ImageUrl;
+            product.Brand = dto.Brand;
+            product.IsAvailable = dto.IsAvailable;
+            product.Rating = dto.Rating;
             product.CategoryId = dto.CategoryId;
-            product.UserUpdate = dto.UserUpdate;
-            product.UserDelete = "luan";
-            product.UserUpdate = "luan";
+            product.UserUpdate = dto.UserUpdate ?? "duyluan";
+            product.UserDelete = "duyluan"; // Có thể bỏ nếu không dùng
             product.UpdatedAt = DateTime.Now;
         }
-        // Có thể mở rộng: Chuyển từ Product sang một DTO khác nếu cần
-        // Ví dụ:
-        // public static ProductResponseDTO ToProductResponseDTO(Product product)
-        // {
-        //     return new ProductResponseDTO
-        //     {
-        //         Id = product.Id,
-        //         Name = product.Name,
-        //         Price = product.Price,
-        //         CategoryName = product.Category?.Name
-        //     };
-        // }
+
+        // Chuyển từ Product sang DTO để trả về client
+
     }
 }

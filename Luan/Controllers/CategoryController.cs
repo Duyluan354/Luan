@@ -22,9 +22,11 @@ namespace Luan.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
-            return await _context.Categories
-                .Include(c => c.Products)
+            var categories = await _context.Categories
+                .Include(c => c.Products) // Nếu Product có lỗi cột Brand, thì xử lý dưới
                 .ToListAsync();
+
+            return Ok(categories);
         }
 
         // GET: api/category/5
@@ -38,7 +40,7 @@ namespace Luan.Controllers
             if (category == null)
                 return NotFound();
 
-            return category;
+            return Ok(category);
         }
 
         // POST: api/category

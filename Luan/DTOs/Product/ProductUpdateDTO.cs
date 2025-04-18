@@ -18,5 +18,11 @@ namespace Luan.DTOs.Product
 
         [Required]
         public int CategoryId { get; set; }
+        public string Description { get; internal set; }
+        public int StockQuantity { get; internal set; }
+        public string ImageUrl { get; internal set; }
+        public string Brand { get; internal set; }
+        public bool IsAvailable { get; internal set; }
+        public double Rating { get; internal set; }
     }
 }
